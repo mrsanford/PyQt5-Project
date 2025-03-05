@@ -1,30 +1,10 @@
 # All the code needed to define interface components
 
 # Widgets are all sorts of interface components
+from typing import Callable
 from PyQt5 import QtWidgets as qtw
-
-# Your application will contain exactly one instance
-## of a QApplication object (or derived subclass)
-# class SayHelloApp(qtw.QApplication):
-#     """
-#     Contains a VerticalHelloBox (a class) to prompt
-#     the user for their name and say hello!
-#     """
-
-#     def __init__(self):
-#         # Call the constructor for the parent class
-#         # the one required argument is usually sys.argv
-#         ## which are command line parameters, but we dont
-#         ### need any now, hence the empty list
-#         super().__init__([])
-
-#         # Add the VerticalHelloBox
-#         self.main_widget = VerticalHelloBox()
-
-#         # Run the application
-#         self.main_widget.show()
-#         sys.exit(self.exec_())
-#         return
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 
 
 class WindowWithVerticalSlots(qtw.QWidget):
@@ -44,6 +24,60 @@ class WindowWithVerticalSlots(qtw.QWidget):
         self.my_layout = qtw.QVBoxLayout(self)
         # will tell it its a child belonging to the window
         return
+
+
+class WindowWithFigureAbove(WindowWithVerticalSlots):
+    """
+    A window with a vertical latyout and matplotlib figure above.
+    """
+
+    def __init__(self, fig: plt.figure, title: str = "Window with a Figure"):
+        super().__init__(title=title)
+
+        # Put the figure into a canvas
+        self.canvas = FigureCanvasQTAgg(fig)
+        # We already generate a figure when we pass this into the constructor
+        # Add that to the layout
+        self.my_layout.addWidget(self.canvas)
+        return
+
+
+class ButtonRow(qtw.QHBoxLayout):
+    """
+    A row of buttons. Names must be provided for each button.
+    """
+
+    # btw: don't create two buttons with the same name
+    def __init__(self, names: list[str]):
+        super().__init__()
+        self.buttons = []
+        for name in names:
+            self.buttons.append(qtw.QPushButton(name))  # the name of the button
+            self.addWidget(self.buttons[-1])
+        return
+
+
+class ButtonBox(qtw.QVBoxLayout):
+    """
+    A vertical container of ButtonRow objects.
+    Specify nrows and ncols when creating.
+    """
+
+    def __init__(self, nrows: int, ncols: int):
+        super().__init__()
+
+        self.rows = []
+        for _ in range(nrows):
+            names = [str(n) for n in range(ncols)]
+            self.row.append(ButtonRow(names))
+            self.addLayout(self.rows[-1])
+        return
+
+
+def configure_button(button: qtw.QPushButton, text: str, command: Callable):
+    button.setText(text)
+    button.clicked.connect(command)
+    return None
 
 
 class InputPopup(qtw.QDialog):
